@@ -10,12 +10,8 @@ OUTPUT_DIR.mkdir(exist_ok=True)
 
 HEADERS = {"User-Agent": "Mozilla/5.0"}
 SOURCES = [
-    ("r/smallbusiness",       "https://www.reddit.com/r/smallbusiness/.rss",                   "en"),
-    ("r/Entrepreneur",        "https://www.reddit.com/r/Entrepreneur/.rss",                    "en"),
-    ("r/PersonalFinanceCanada","https://www.reddit.com/r/PersonalFinanceCanada/.rss",           "en"),
     ("C'est pas mon idée",    "https://blog.cestpasmonidee.fr/feeds/posts/default?alt=rss",    "fr"),
     ("Repreneuriat Québec",   "https://repreneuriat.quebec/feed",                              "fr"),
-    ("Newswire Canada",       "https://fetchrss.com/feed/1wEbg33M62tO1wEbdm7ZT4jy.rss",       "fr"),
     ("Financial Post",        "https://financialpost.com/feed/",                              "en"),
 ]
 cutoff = datetime.now(timezone.utc) - timedelta(hours=24)
@@ -97,4 +93,4 @@ for name, url, lang in SOURCES:
 output_file = OUTPUT_DIR / "articles.json"
 with open(output_file, "w", encoding="utf-8") as f:
     json.dump(items, f, ensure_ascii=False, indent=2)
-print(f"Stage 01 complete — {len(items)} articles → {output_file}")
+print(f"Stage 01 complete -- {len(items)} articles -> {output_file}")

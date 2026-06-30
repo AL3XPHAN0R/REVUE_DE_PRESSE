@@ -1,6 +1,9 @@
 import requests, os, sys, shutil
 from pathlib import Path
 from datetime import datetime
+from dotenv import load_dotenv
+
+load_dotenv(Path(__file__).parent.parent.parent / ".env")
 
 SCRIPT_DIR   = Path(__file__).parent
 ROOT_DIR     = (SCRIPT_DIR / "../..").resolve()
@@ -37,4 +40,4 @@ archive = OUTPUT_DIR / f"{datetime.now().strftime('%Y-%m-%d')}.md"
 shutil.copy(CURATED_FILE, archive)
 
 print(f"Stage 03 complete — sent {len(chunks)} chunk(s) to Telegram")
-print(f"Archived → {archive}")
+print(f"Archived -> {archive}")
