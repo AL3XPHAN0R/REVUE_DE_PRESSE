@@ -1,0 +1,14 @@
+# Secrets
+.env
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+
+# Stage outputs (transient — regenerated each run)
+stages/01_fetch/output/*.json
+stages/02_curate/output/*.md
+
+# Stage 03 archives are kept (versioned digest history)
+# stages/03_send/output/ is tracked
