@@ -1,6 +1,9 @@
 # Secrets
 .env
 
+# Draft contains personal account details (Reddit username, repo link)
+_config/reddit_api_application_draft.md
+
 # Python
 __pycache__/
 *.pyc
