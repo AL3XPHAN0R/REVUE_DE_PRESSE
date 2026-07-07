@@ -13,6 +13,8 @@ SOURCES = [
     ("C'est pas mon idée",    "https://blog.cestpasmonidee.fr/feeds/posts/default?alt=rss",    "fr"),
     ("Repreneuriat Québec",   "https://repreneuriat.quebec/feed",                              "fr"),
     ("Financial Post",        "https://financialpost.com/feed/",                              "en"),
+    ("Conseiller.ca",         "https://www.conseiller.ca/feed/",                               "fr"),
+    ("Insurance Business Canada", "https://www.insurancebusinessmag.com/ca/rss/",              "en"),
 ]
 cutoff = datetime.now(timezone.utc) - timedelta(hours=24)
 
@@ -53,7 +55,9 @@ def parse_feed(content):
                        entry.findtext("{http://www.w3.org/2005/Atom}updated"))
             results.append((title, url, parse_date(pub_str)))
     else:
-        channel = root.find("channel") or root
+        channel = root.find("channel")
+        if channel is None:
+            channel = root
         items = channel.findall("item") or root.findall(".//item")
         for item in items:
             title = item.findtext("title", "").strip()
