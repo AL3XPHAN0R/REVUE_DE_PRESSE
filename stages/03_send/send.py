@@ -19,7 +19,14 @@ if not CURATED_FILE.exists():
     sys.exit(1)
 
 message = CURATED_FILE.read_text(encoding="utf-8").strip()
-chunks  = [message[i:i + 4000] for i in range(0, len(message), 4000)]
+
+# Backticks aren't part of the digest format (voice.md) and never appear
+# intentionally — a stray one leaking in from a source's article title turns
+# the rest of the message into a single Telegram "code" entity, which kills
+# link auto-detection and renders everything in monospace.
+message = message.replace("`", "")
+
+chunks = [message[i:i + 4000] for i in range(0, len(message), 4000)]
 
 for i, chunk in enumerate(chunks, 1):
     r = requests.post(
@@ -33,8 +40,22 @@ for i, chunk in enumerate(chunks, 1):
         timeout=15,
     )
     if not r.ok:
-        print(f"ERROR Telegram (chunk {i}): {r.status_code} — {r.text}")
-        sys.exit(1)
+        # Fall back to plain text so an unforeseen formatting character
+        # (mismatched * or _ from a source title) doesn't silently drop
+        # the whole day's digest — links still auto-link without parse_mode.
+        print(f"WARN Telegram Markdown parse failed (chunk {i}): {r.status_code} — {r.text}")
+        r = requests.post(
+            f"https://api.telegram.org/bot{TOKEN}/sendMessage",
+            json={
+                "chat_id": CHAT_ID,
+                "text": chunk,
+                "disable_web_page_preview": True,
+            },
+            timeout=15,
+        )
+        if not r.ok:
+            print(f"ERROR Telegram (chunk {i}): {r.status_code} — {r.text}")
+            sys.exit(1)
 
 archive = OUTPUT_DIR / f"{datetime.now().strftime('%Y-%m-%d')}.md"
 shutil.copy(CURATED_FILE, archive)

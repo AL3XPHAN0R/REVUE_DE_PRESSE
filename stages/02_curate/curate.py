@@ -73,7 +73,19 @@ message = client.messages.create(
     messages=[{"role": "user", "content": user_text}],
 )
 
-digest      = message.content[0].text.strip()
+digest = message.content[0].text.strip()
+
+# Haiku sometimes wraps its whole answer in a markdown code fence, echoing
+# the fenced example in voice.md. Telegram's Markdown parser would then treat
+# the entire digest as one code block, breaking bold/italic and turning off
+# link auto-detection — so unwrap a leading/trailing ``` fence if present.
+if digest.startswith("```"):
+    first_line_end = digest.find("\n")
+    digest = digest[first_line_end + 1:] if first_line_end != -1 else ""
+    digest = digest.strip()
+    if digest.endswith("```"):
+        digest = digest[:-3].strip()
+
 output_file = OUTPUT_DIR / "curated.md"
 output_file.write_text(digest, encoding="utf-8")
 
