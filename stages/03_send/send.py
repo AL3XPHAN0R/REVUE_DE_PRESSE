@@ -24,7 +24,7 @@ message = CURATED_FILE.read_text(encoding="utf-8").strip()
 # intentionally — a stray one leaking in from a source's article title turns
 # the rest of the message into a single Telegram "code" entity, which kills
 # link auto-detection and renders everything in monospace.
-message = message.replace("`", "'")
+message = message.replace("`", "")
 
 chunks = [message[i:i + 4000] for i in range(0, len(message), 4000)]
 
