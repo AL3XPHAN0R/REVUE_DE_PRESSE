@@ -15,6 +15,8 @@ SOURCES = [
     ("Financial Post",        "https://financialpost.com/feed/",                              "en"),
     ("Conseiller.ca",         "https://www.conseiller.ca/feed/",                               "fr"),
     ("Insurance Business Canada", "https://www.insurancebusinessmag.com/ca/rss/",              "en"),
+    ("Investment Executive",  "https://www.investmentexecutive.com/feed/",                     "en"),
+    ("Advisor.ca",            "https://www.advisor.ca/feed/",                                  "en"),
 ]
 cutoff = datetime.now(timezone.utc) - timedelta(hours=24)
 
