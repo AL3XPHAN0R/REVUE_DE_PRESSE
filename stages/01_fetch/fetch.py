@@ -8,15 +8,23 @@ SCRIPT_DIR = Path(__file__).parent
 OUTPUT_DIR = SCRIPT_DIR / "output"
 OUTPUT_DIR.mkdir(exist_ok=True)
 
-HEADERS = {"User-Agent": "Mozilla/5.0"}
+HEADERS = {
+    "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 "
+                  "(KHTML, like Gecko) Chrome/125.0.0.0 Safari/537.36",
+    "Accept": "application/rss+xml, application/atom+xml, application/xml;q=0.9, */*;q=0.8",
+}
 SOURCES = [
     ("C'est pas mon idée",    "https://blog.cestpasmonidee.fr/feeds/posts/default?alt=rss",    "fr"),
-    ("Repreneuriat Québec",   "https://repreneuriat.quebec/feed",                              "fr"),
     ("Financial Post",        "https://financialpost.com/feed/",                              "en"),
-    ("Conseiller.ca",         "https://www.conseiller.ca/feed/",                               "fr"),
     ("Insurance Business Canada", "https://www.insurancebusinessmag.com/ca/rss/",              "en"),
-    ("Investment Executive",  "https://www.investmentexecutive.com/feed/",                     "en"),
-    ("Advisor.ca",            "https://www.advisor.ca/feed/",                                  "en"),
+    ("Avantages",             "https://www.avantages.ca/feed/",                                "fr"),
+    ("Benefits and Pensions Monitor", "https://www.benefitsandpensionsmonitor.com/rss",         "en"),
+    ("Retraite Québec",       "https://www.retraitequebec.gouv.qc.ca/rss.xml",                  "fr"),
+    ("Chambre de la sécurité financière", "https://www.chambresf.com/rss.xml",                  "fr"),
+    ("Canadian Mortgage Trends", "https://www.canadianmortgagetrends.com/feed/",                "en"),
+    ("Canadian HR Reporter",  "https://www.hrreporter.com/rss",                                 "en"),
+    ("La Presse — santé",     "https://www.lapresse.ca/actualites/sante/rss",                   "fr"),
+    ("Radio-Canada — santé",  "https://ici.radio-canada.ca/rss/4159",                           "fr"),
 ]
 cutoff = datetime.now(timezone.utc) - timedelta(hours=24)
 

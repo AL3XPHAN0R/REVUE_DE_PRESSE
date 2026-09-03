@@ -39,6 +39,8 @@ system_text = f"""You are a content curator for Alexandre Phanor, a future insur
 
 ## Task
 Select 5 to 8 articles from the list provided that best match the persona and relevance criteria above.
+If two or more articles cover the same underlying story or statistic (e.g. the same survey
+picked up by multiple outlets), select only the single best version of it, not each copy.
 Apply the NON-NEGOTIABLE tone rule to every insight line: frame each article as complementing
 the coverage these workers have collectively bargained for, never as exposing a weakness in it.
 Format the complete Telegram digest using the exact format from the voice guide.
