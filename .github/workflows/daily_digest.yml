@@ -9,6 +9,9 @@ jobs:
   digest:
     runs-on: ubuntu-latest
 
+    permissions:
+      contents: write
+
     steps:
       - name: Checkout repo
         uses: actions/checkout@v6
@@ -35,3 +38,16 @@ jobs:
           TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
           TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
         run: python stages/03_send/send.py
+
+      - name: Archive digest to repo
+        # Stage 03 writes the digest to the runner's disk, where it dies with
+        # the job. Committing it keeps the versioned history .gitignore
+        # promises, and the daily push doubles as the repository activity
+        # GitHub needs to stop auto-disabling this schedule after 60 days.
+        run: |
+          git config user.name  "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add stages/03_send/output/
+          git diff --staged --quiet && echo "No new digest to archive" && exit 0
+          git commit -m "chore: archive $(date -u +%Y-%m-%d) digest"
+          git push

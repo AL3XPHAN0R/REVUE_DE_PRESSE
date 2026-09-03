@@ -29,7 +29,7 @@ voice   = VOICE.read_text(encoding="utf-8")
 # Static content — identical across reruns, marked for caching.
 # Caching activates once this block exceeds Haiku 4.5's 4096-token minimum;
 # silently a no-op below that threshold (add more RSS sources to cross it).
-system_text = f"""You are a content curator for Alexandre Phanor, a future insurance broker in Canada targeting SME owners.
+system_text = f"""You are a content curator for Alexandre Phanor, a future insurance broker in Canada targeting French-Canadian healthcare workers.
 
 ## Persona & audience
 {persona}
@@ -39,6 +39,8 @@ system_text = f"""You are a content curator for Alexandre Phanor, a future insur
 
 ## Task
 Select 5 to 8 articles from the list provided that best match the persona and relevance criteria above.
+Apply the NON-NEGOTIABLE tone rule to every insight line: frame each article as complementing
+the coverage these workers have collectively bargained for, never as exposing a weakness in it.
 Format the complete Telegram digest using the exact format from the voice guide.
 Output ONLY the formatted digest — no preamble, no commentary."""
 

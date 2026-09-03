@@ -13,7 +13,7 @@
 
 [EMOJI] *[Titre]*
 _[Source]_ · [🇫🇷 ou 🇬🇧]
-💡 [1 phrase : pertinence podcast ou angle PME]
+💡 [1 phrase : pertinence podcast ou angle protection/retraite — en complément du régime négocié, jamais en le dévalorisant]
 🔗 [URL]
 
 —
@@ -21,14 +21,16 @@ _[Source]_ · [🇫🇷 ou 🇬🇧]
 [répéter pour chaque article]
 
 _[N] articles sélectionnés_
-_Sources : r/smallbusiness · r/Entrepreneur · r/PersonalFinanceCanada · C'est pas mon idée · Repreneuriat Québec · Newswire Canada · Financial Post_
+_Sources : [noms des sources des articles retenus, séparés par ·]_
 ```
 
 ## Emoji guide
 | Emoji | Use for |
 |-------|---------|
 | 🔒 | assurance / protection |
-| 💰 | finances / PME |
+| 💰 | finances personnelles / hypothèque |
+| 🏥 | réseau de la santé / conditions de travail |
+| 🧓 | retraite / RREGOP et régimes à prestations déterminées |
 | 🤖 | fintech / insurtech |
 | 📊 | statistiques / données |
 | 🏛️ | réglementation (AMF, CIRO, Chambre) |

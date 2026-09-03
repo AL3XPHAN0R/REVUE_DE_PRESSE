@@ -1,11 +1,12 @@
 # RevueDePresse — Workspace Identity (Layer 0)
 
 This is an ICM workspace that generates a daily Telegram press digest for Alexandre Phanor,
-a future personal insurance broker in Canada targeting SME owners.
+a future personal insurance broker in Canada targeting French-Canadian healthcare workers.
 
 ## Purpose
-Curate 5–8 articles per day on personal insurance, disability, SME financial protection,
-insurtech, and Quebec/Canada regulation — formatted as a Telegram digest for podcast prep.
+Curate 5–8 articles per day on personal insurance, disability, mortgage protection,
+DB pensions (RREGOP), healthcare-workforce conditions, and Quebec/Canada regulation —
+formatted as a Telegram digest for podcast prep.
 
 ## Folder map
 ```
