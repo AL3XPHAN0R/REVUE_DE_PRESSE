@@ -29,8 +29,8 @@ _Sources : [noms des sources des articles retenus, séparés par ·]_
 |-------|---------|
 | 🔒 | assurance / protection |
 | 💰 | finances personnelles / hypothèque |
-| 🏥 | réseau de la santé / conditions de travail |
-| 🧓 | retraite / RREGOP et régimes à prestations déterminées |
+| 🏥 | réseau de la santé / pratique privée / conditions de travail |
+| 🧑‍💼 | travailleurs autonomes / propriétaires d'entreprise |
 | 🤖 | fintech / insurtech |
 | 📊 | statistiques / données |
 | 🏛️ | réglementation (AMF, CIRO, Chambre) |

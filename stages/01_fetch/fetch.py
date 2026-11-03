@@ -13,18 +13,35 @@ HEADERS = {
                   "(KHTML, like Gecko) Chrome/125.0.0.0 Safari/537.36",
     "Accept": "application/rss+xml, application/atom+xml, application/xml;q=0.9, */*;q=0.8",
 }
+# Google News "site:" search feeds — the only way to reach trade sources that have no RSS
+# (Portail de l'assurance) or block direct feed requests with Cloudflare (Conseiller.ca,
+# Finance et Investissement). Links are news.google.com redirects that open the article.
+def gnews(site, lang="fr"):
+    return (f"https://news.google.com/rss/search?q=site:{site}+when:2d"
+            f"&hl={lang}-CA&gl=CA&ceid=CA:{lang}")
+
+
 SOURCES = [
-    ("C'est pas mon idée",    "https://blog.cestpasmonidee.fr/feeds/posts/default?alt=rss",    "fr"),
-    ("Financial Post",        "https://financialpost.com/feed/",                              "en"),
-    ("Insurance Business Canada", "https://www.insurancebusinessmag.com/ca/rss/",              "en"),
-    ("Avantages",             "https://www.avantages.ca/feed/",                                "fr"),
+    # Personal-insurance trade press
+    ("Portail de l'assurance",    gnews("portail-assurance.ca"),                                "fr"),
+    ("Conseiller.ca",             gnews("conseiller.ca"),                                       "fr"),
+    ("Finance et Investissement", gnews("finance-investissement.com"),                          "fr"),
+    ("Avantages",                 "https://www.avantages.ca/feed/",                             "fr"),
+    ("Insurance Business Canada", "https://www.insurancebusinessmag.com/ca/rss/",               "en"),
+    ("Wealth Professional",       "https://www.wealthprofessional.ca/rss/",                     "en"),
     ("Benefits and Pensions Monitor", "https://www.benefitsandpensionsmonitor.com/rss",         "en"),
-    ("Retraite Québec",       "https://www.retraitequebec.gouv.qc.ca/rss.xml",                  "fr"),
+    ("C'est pas mon idée",        "https://blog.cestpasmonidee.fr/feeds/posts/default?alt=rss", "fr"),
+    # Regulator
     ("Chambre de la sécurité financière", "https://www.chambresf.com/rss.xml",                  "fr"),
-    ("Canadian Mortgage Trends", "https://www.canadianmortgagetrends.com/feed/",                "en"),
-    ("Canadian HR Reporter",  "https://www.hrreporter.com/rss",                                 "en"),
-    ("La Presse — santé",     "https://www.lapresse.ca/actualites/sante/rss",                   "fr"),
-    ("Radio-Canada — santé",  "https://ici.radio-canada.ca/rss/4159",                           "fr"),
+    # Household finance, mortgage, self-employed
+    ("La Presse — finances personnelles", "https://www.lapresse.ca/affaires/finances-personnelles/rss", "fr"),
+    ("Le Devoir — finances personnelles", "https://www.ledevoir.com/rss/section/economie/finances-personnelles.xml", "fr"),
+    ("Globe and Mail — personal finance", "https://www.theglobeandmail.com/arc/outboundfeeds/rss/category/investing/personal-finance/", "en"),
+    ("MoneySense",                "https://www.moneysense.ca/feed/",                            "en"),
+    ("Canadian Mortgage Trends",  "https://www.canadianmortgagetrends.com/feed/",               "en"),
+    # Health network (public -> private practice shift, workforce)
+    ("La Presse — santé",         "https://www.lapresse.ca/actualites/sante/rss",               "fr"),
+    ("Radio-Canada — santé",      "https://ici.radio-canada.ca/rss/4171",                       "fr"),
 ]
 cutoff = datetime.now(timezone.utc) - timedelta(hours=24)
 
@@ -91,6 +108,8 @@ for name, url, lang in SOURCES:
         for title, link, pub in parse_feed(r.content):
             if pub and pub < cutoff:
                 continue
+            if "news.google.com" in url and " - " in title:
+                title = title.rsplit(" - ", 1)[0]  # drop Google News' " - Source" suffix
             items.append({
                 "title": title,
                 "url": link,

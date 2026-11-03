@@ -4,22 +4,81 @@ Add or remove sources here. Stage 01 reads this list at runtime.
 
 | Name | URL | Lang |
 |------|-----|------|
-| C'est pas mon idée | https://blog.cestpasmonidee.fr/feeds/posts/default?alt=rss | fr |
-| Financial Post | https://financialpost.com/feed/ | en |
-| Insurance Business Canada | https://www.insurancebusinessmag.com/ca/rss/ | en |
+| Portail de l'assurance | Google News `site:portail-assurance.ca` | fr |
+| Conseiller.ca | Google News `site:conseiller.ca` | fr |
+| Finance et Investissement | Google News `site:finance-investissement.com` | fr |
 | Avantages | https://www.avantages.ca/feed/ | fr |
+| Insurance Business Canada | https://www.insurancebusinessmag.com/ca/rss/ | en |
+| Wealth Professional | https://www.wealthprofessional.ca/rss/ | en |
 | Benefits and Pensions Monitor | https://www.benefitsandpensionsmonitor.com/rss | en |
-| Retraite Québec | https://www.retraitequebec.gouv.qc.ca/rss.xml | fr |
+| C'est pas mon idée | https://blog.cestpasmonidee.fr/feeds/posts/default?alt=rss | fr |
 | Chambre de la sécurité financière | https://www.chambresf.com/rss.xml | fr |
+| La Presse — finances personnelles | https://www.lapresse.ca/affaires/finances-personnelles/rss | fr |
+| Le Devoir — finances personnelles | https://www.ledevoir.com/rss/section/economie/finances-personnelles.xml | fr |
+| Globe and Mail — personal finance | https://www.theglobeandmail.com/arc/outboundfeeds/rss/category/investing/personal-finance/ | en |
+| MoneySense | https://www.moneysense.ca/feed/ | en |
 | Canadian Mortgage Trends | https://www.canadianmortgagetrends.com/feed/ | en |
-| Canadian HR Reporter | https://www.hrreporter.com/rss | en |
 | La Presse — santé | https://www.lapresse.ca/actualites/sante/rss | fr |
-| Radio-Canada — santé | https://ici.radio-canada.ca/rss/4159 | fr |
+| Radio-Canada — santé | https://ici.radio-canada.ca/rss/4171 | fr |
 
 Note: this table is documentation only — `stages/01_fetch/fetch.py` hardcodes its own
-`SOURCES` list, which currently matches the 11 rows above.
+`SOURCES` list, which currently matches the 16 rows above. Google News rows use the
+`gnews()` helper: `https://news.google.com/rss/search?q=site:<domain>+when:2d&hl=fr-CA&gl=CA&ceid=CA:fr`.
 
-## 2026-09-03 — market pivot from SME owners to French-Canadian healthcare workers
+## 2026-11-02 — re-targeting on the four porte A niches
+
+Target groups now come from the "Niches de protection" / "Niches entrepreneurs" sheets:
+Invalidité en pratique privée, Invalidité du propriétaire, Assurance prêt, Assurance prêt
+des autonomes (see `persona.md`). Mix of groups, relevance first; overhead expense excluded.
+Every feed below was validated 2026-11-02 (modern-browser UA, `feedparser`, 7-day item count,
+keyword-relevance count on titles).
+
+**Google News `site:` workaround.** Google News search RSS returns the latest indexed
+articles of a single domain, which brings back sources with no RSS (Portail de l'assurance)
+or that block direct feed requests with Cloudflare (Conseiller.ca, Finance et Investissement —
+still `403` on `/feed/` today). Links are `news.google.com` redirects that open the article
+in a browser; `fetch.py` strips the trailing ` - Source` from titles. Hub pages
+("À l'agenda", "Dossier – …") show up too and are left to Stage 02. Plain keyword searches
+("assurance invalidité", "travailleurs autonomes") were tested and rejected: too noisy
+(horoscopes, Swiss *assurance-invalidité*, rate-comparison SEO pages).
+
+Added:
+
+| Source | Fit |
+|--------|-----|
+| **Portail de l'assurance** | 🇫🇷 Tier 1 Quebec insurance trade press — finally reachable. Individual and group insurance, claims data, insurer results. |
+| **Conseiller.ca** | 🇫🇷 Advisor trade press, has a "Conseiller PME" section (owners, self-employed). |
+| **Finance et Investissement** | 🇫🇷 Advisor trade press, insurance + regulation; heavier on investment (Stage 02 filters). |
+| **Wealth Professional** | 🇬🇧 High volume (~54/7d) but strong hits: critical illness coverage gap, AMF warnings, young homebuyers, small-business sales. |
+| **La Presse — finances personnelles** | 🇫🇷 Household finance columns (mortgage, budget). Low volume, cryptic headlines that keyword-counting undervalues. |
+| **Le Devoir — finances personnelles** | 🇫🇷 Same profile, very low volume. |
+| **Globe and Mail — personal finance** | 🇬🇧 Replaces Financial Post. Best EN household-finance hit rate (8/21 over 7 days: mortgage, tax, retirement). Paywalled, headlines still usable for prep. |
+| **MoneySense** | 🇬🇧 Personal finance with regular self-employed / tradesperson stories. |
+
+Fixed:
+- **Radio-Canada — santé**: `rss/4159` was **not** the health feed (politics / US news). The
+  health feed is `rss/4171` (37 items/7d, health network + private-surgery stories).
+
+Dropped:
+- **Financial Post** — `/feed/` now returns an HTML page (0 entries); category feeds too.
+- **Retraite Québec** — 0 items in 7 days, entries are admin pages; RREGOP literacy is no longer a core theme.
+- **Canadian HR Reporter** — employer/HR perspective, excluded by `persona.md` (3/20 relevant).
+
+Kept: Avantages, Insurance Business Canada (31/51 relevant), Benefits and Pensions Monitor
+(group-plan heavy, but supplies disability / mental-health / critical-illness claim statistics),
+CSF, Canadian Mortgage Trends (6/10), La Presse santé, C'est pas mon idée (insurtech).
+
+Considered and held back (2026-11-02):
+- **Les Affaires** (`lesaffaires.com/feed/`) — works again but intermittently answers `202` (bot challenge); general business news, all section feeds return the same content.
+- **Radio-Canada économie** (`rss/5717`), **Journal de Montréal / TVA argent** — high volume, 2–6 relevant out of 18–50.
+- **Canadian Mortgage Professional** (`mpamag.com/ca/rss/`) — mortgage-broker industry news (awards, lender results); redundant with Canadian Mortgage Trends.
+- **Benefits Canada** (`benefitscanada.com/feed/`) — works again, employer perspective.
+- **Insurance Portal** (Google News `site:insurance-portal.ca`) — English twin of Portail de l'assurance, would duplicate it.
+- **Advisor.ca**, **Investment Executive** (Google News `site:`) — reachable this way, but mostly markets; Conseiller.ca covers the same publisher in French.
+- **nesto**, **Ratehub**, **Multi-Prêts** blogs — rate forecasts, thin.
+- No feed: OPQ, OEQ, OOAQ, FMOQ, CPA Québec, FCEI, BDC, FCCQ, Planiprêt, Option consommateurs, Protégez-Vous (direct). Professional orders have no RSS — private-practice coverage relies on La Presse/Radio-Canada santé and the trade press.
+
+## 2026-09-03 — market pivot (historical) from SME owners to French-Canadian healthcare workers
 
 Dropped (see `_config/persona.md`, retired 2026-09-03):
 - **Repreneuriat Québec** — 0 articles on last fetch and off-niche after the pivot (SME succession).
