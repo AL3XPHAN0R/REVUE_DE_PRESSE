@@ -36,6 +36,7 @@ SOURCES = [
     # Household finance, mortgage, self-employed
     ("La Presse — finances personnelles", "https://www.lapresse.ca/affaires/finances-personnelles/rss", "fr"),
     ("Le Devoir — finances personnelles", "https://www.ledevoir.com/rss/section/economie/finances-personnelles.xml", "fr"),
+    ("ÉducÉpargne",               "https://educepargne.ca/feed/",                               "fr"),
     ("Globe and Mail — personal finance", "https://www.theglobeandmail.com/arc/outboundfeeds/rss/category/investing/personal-finance/", "en"),
     ("MoneySense",                "https://www.moneysense.ca/feed/",                            "en"),
     ("Canadian Mortgage Trends",  "https://www.canadianmortgagetrends.com/feed/",               "en"),
