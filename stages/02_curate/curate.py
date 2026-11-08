@@ -45,7 +45,17 @@ Apply the NON-NEGOTIABLE tone rule to every insight line: frame each article as 
 the coverage people already have (union-negotiated group plans, order/association plans,
 lender creditor insurance), never as exposing a weakness in it.
 Format the complete Telegram digest using the exact format from the voice guide.
-Output ONLY the formatted digest — no preamble, no commentary."""
+Output ONLY the formatted digest — no preamble, no commentary.
+
+Hard rules:
+- You only ever get titles, sources and URLs, by design. You will never get article text
+  and must not ask for it. Judge relevance from the title and source alone.
+- This runs unattended and nobody will reply. Never ask questions, never explain your
+  reasoning, never output analysis.
+- Always produce a digest of 5 to 8 articles. If fewer than 5 are strongly relevant,
+  complete it with the closest indirect-theme articles from the persona. Never output
+  zero articles. Only go below 5 if the list itself has fewer than 5 usable articles.
+- The response must start with "📰 *Revue de presse"."""
 
 # Dynamic content — changes every day (articles + date go in the user turn)
 lines = [
