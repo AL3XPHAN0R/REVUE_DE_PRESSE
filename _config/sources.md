@@ -15,6 +15,7 @@ Add or remove sources here. Stage 01 reads this list at runtime.
 | Chambre de la sécurité financière | https://www.chambresf.com/rss.xml | fr |
 | La Presse — finances personnelles | https://www.lapresse.ca/affaires/finances-personnelles/rss | fr |
 | Le Devoir — finances personnelles | https://www.ledevoir.com/rss/section/economie/finances-personnelles.xml | fr |
+| ÉducÉpargne | https://educepargne.ca/feed/ | fr |
 | Globe and Mail — personal finance | https://www.theglobeandmail.com/arc/outboundfeeds/rss/category/investing/personal-finance/ | en |
 | MoneySense | https://www.moneysense.ca/feed/ | en |
 | Canadian Mortgage Trends | https://www.canadianmortgagetrends.com/feed/ | en |
@@ -22,8 +23,18 @@ Add or remove sources here. Stage 01 reads this list at runtime.
 | Radio-Canada — santé | https://ici.radio-canada.ca/rss/4171 | fr |
 
 Note: this table is documentation only — `stages/01_fetch/fetch.py` hardcodes its own
-`SOURCES` list, which currently matches the 16 rows above. Google News rows use the
+`SOURCES` list, which currently matches the 17 rows above. Google News rows use the
 `gnews()` helper: `https://news.google.com/rss/search?q=site:<domain>+when:2d&hl=fr-CA&gl=CA&ceid=CA:fr`.
+
+## 2026-11-06 — ÉducÉpargne added
+
+**ÉducÉpargne** (`educepargne.ca/feed/`, WordPress RSS) — 🇫🇷 Quebec financial-education site:
+original studies on Quebecers' savings behaviour (e.g. 2026-11-04 study on economic uncertainty),
+household debt, couple finances, retirement. Low volume: 11 items in the feed going back to
+2026-06-12, 3 of them in the last 7 days, so it will be absent from most daily fetches. Mostly
+general household finance, with no direct insurance coverage in the current items (Stage 02
+filters); value is Quebec statistics and podcast angles for young households. Some items are
+institutional ("Rapport d'activités", campaign launches).
 
 ## 2026-11-02 — re-targeting on the four porte A niches
 
