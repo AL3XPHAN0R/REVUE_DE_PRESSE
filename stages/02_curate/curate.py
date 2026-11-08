@@ -3,6 +3,7 @@ from pathlib import Path
 from datetime import datetime
 import anthropic
 from dotenv import load_dotenv
+from guard import clean, is_valid
 
 load_dotenv(Path(__file__).parent.parent.parent / ".env")
 
@@ -13,6 +14,10 @@ PERSONA     = ROOT_DIR / "_config/persona.md"
 VOICE       = ROOT_DIR / "_config/voice.md"
 OUTPUT_DIR  = SCRIPT_DIR / "output"
 OUTPUT_DIR.mkdir(exist_ok=True)
+OUTPUT_FILE = OUTPUT_DIR / "curated.md"
+
+# A failed run must never leave yesterday's digest behind for Stage 03 to resend.
+OUTPUT_FILE.unlink(missing_ok=True)
 
 if not ARTICLES.exists():
     print("ERROR: articles.json not found. Run Stage 01 first.")
@@ -74,41 +79,54 @@ user_text = f"""## Articles disponibles aujourd'hui ({len(articles)} au total)
 
 Date du digest : {date_fr}"""
 
-client  = anthropic.Anthropic(api_key=os.environ["ANTHROPIC_API_KEY"])
-message = client.messages.create(
-    model="claude-haiku-4-5-20251001",
-    max_tokens=2048,
-    system=[
-        {
-            "type": "text",
-            "text": system_text,
-            "cache_control": {"type": "ephemeral"},
-        }
-    ],
-    messages=[{"role": "user", "content": user_text}],
-)
+RETRY_TEXT = ("That output was not a digest. Reply with ONLY the formatted Telegram digest, "
+              "starting with 📰, selecting 5–8 articles from the list based on titles alone.")
 
-digest = message.content[0].text.strip()
+client = anthropic.Anthropic(api_key=os.environ["ANTHROPIC_API_KEY"])
 
-# Haiku sometimes wraps its whole answer in a markdown code fence, echoing
-# the fenced example in voice.md. Telegram's Markdown parser would then treat
-# the entire digest as one code block, breaking bold/italic and turning off
-# link auto-detection — so unwrap a leading/trailing ``` fence if present.
-if digest.startswith("```"):
-    first_line_end = digest.find("\n")
-    digest = digest[first_line_end + 1:] if first_line_end != -1 else ""
-    digest = digest.strip()
-    if digest.endswith("```"):
-        digest = digest[:-3].strip()
 
-output_file = OUTPUT_DIR / "curated.md"
-output_file.write_text(digest, encoding="utf-8")
+def ask(messages):
+    return client.messages.create(
+        model="claude-haiku-4-5-20251001",
+        max_tokens=2048,
+        system=[
+            {
+                "type": "text",
+                "text": system_text,
+                "cache_control": {"type": "ephemeral"},
+            }
+        ],
+        messages=messages,
+    )
+
+
+messages = [{"role": "user", "content": user_text}]
+message  = ask(messages)
+raw      = message.content[0].text
+digest   = clean(raw)
+
+if not is_valid(digest):
+    print("WARN Haiku's answer is not a digest -- retrying once")
+    messages += [
+        {"role": "assistant", "content": raw.strip()},
+        {"role": "user", "content": RETRY_TEXT},
+    ]
+    message = ask(messages)
+    raw     = message.content[0].text
+    digest  = clean(raw)
+
+if not is_valid(digest):
+    print("ERROR Haiku did not return a valid digest after one retry. Raw output:\n")
+    print(raw)
+    sys.exit(1)
+
+OUTPUT_FILE.write_text(digest, encoding="utf-8")
 
 u             = message.usage
 cache_created = getattr(u, "cache_creation_input_tokens", 0) or 0
 cache_read    = getattr(u, "cache_read_input_tokens", 0) or 0
 
-print(f"Stage 02 complete -- digest -> {output_file}")
+print(f"Stage 02 complete -- digest -> {OUTPUT_FILE}")
 print(f"Tokens: {u.input_tokens} in / {u.output_tokens} out"
       f" | cache write: {cache_created} / read: {cache_read}")
 if cache_created == 0 and cache_read == 0:
