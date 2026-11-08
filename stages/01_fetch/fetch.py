@@ -1,4 +1,4 @@
-import requests, json, sys, time
+import requests, json, re, sys, time
 import xml.etree.ElementTree as ET
 from datetime import datetime, timedelta, timezone
 from email.utils import parsedate_to_datetime
@@ -44,6 +44,21 @@ SOURCES = [
     ("Radio-Canada — santé",      "https://ici.radio-canada.ca/rss/4171",                       "fr"),
 ]
 cutoff = datetime.now(timezone.utc) - timedelta(hours=24)
+
+# Google News "site:" searches also index section and pagination pages
+# ("Actualités", "Actualités - Page 666 sur 1962", "Frédéric Roy - Page 21").
+# On a quiet weekend these were 10 of 15 items and starved the curator.
+PAGINATION = re.compile(r"^page \d+( sur \d+)?$", re.IGNORECASE)
+
+
+def is_junk_title(title, source):
+    t = title.strip()
+    if not t or t.casefold() == source.casefold():
+        return True
+    if any(PAGINATION.match(seg.strip()) for seg in t.split(" - ")):
+        return True
+    words = [w for w in t.split() if any(c.isalnum() for c in w)]
+    return len(words) < 4
 
 
 def parse_date(s):
@@ -104,12 +119,15 @@ for name, url, lang in SOURCES:
     try:
         r = requests.get(url, headers=HEADERS, timeout=12)
         r.raise_for_status()
-        count = 0
+        count = junk = 0
         for title, link, pub in parse_feed(r.content):
             if pub and pub < cutoff:
                 continue
             if "news.google.com" in url and " - " in title:
                 title = title.rsplit(" - ", 1)[0]  # drop Google News' " - Source" suffix
+            if is_junk_title(title, name):
+                junk += 1
+                continue
             items.append({
                 "title": title,
                 "url": link,
@@ -118,7 +136,7 @@ for name, url, lang in SOURCES:
                 "date": pub.isoformat() if pub else "?",
             })
             count += 1
-        print(f"  {name}: {count} articles")
+        print(f"  {name}: {count} articles" + (f" (dropped {junk} junk titles)" if junk else ""))
         time.sleep(1)
     except Exception as ex:
         print(f"WARN {name}: {ex}", file=sys.stderr)
