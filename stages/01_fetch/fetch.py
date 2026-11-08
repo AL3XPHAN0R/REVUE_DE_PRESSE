@@ -17,7 +17,7 @@ HEADERS = {
 # (Portail de l'assurance) or block direct feed requests with Cloudflare (Conseiller.ca,
 # Finance et Investissement). Links are news.google.com redirects that open the article.
 def gnews(site, lang="fr"):
-    return (f"https://news.google.com/rss/search?q=site:{site}+when:2d"
+    return (f"https://news.google.com/rss/search?q=site:{site}+when:3d"
             f"&hl={lang}-CA&gl=CA&ceid=CA:{lang}")
 
 
@@ -43,7 +43,9 @@ SOURCES = [
     ("La Presse — santé",         "https://www.lapresse.ca/actualites/sante/rss",               "fr"),
     ("Radio-Canada — santé",      "https://ici.radio-canada.ca/rss/4171",                       "fr"),
 ]
-cutoff = datetime.now(timezone.utc) - timedelta(hours=24)
+DEFAULT_WINDOW_H = 24
+WIDE_WINDOW_H    = 72   # used when the 24h pool is thin (weekends: trade feeds go quiet)
+MIN_ARTICLES     = 40
 
 # Google News "site:" searches also index section and pagination pages
 # ("Actualités", "Actualités - Page 666 sur 1962", "Frédéric Roy - Page 21").
@@ -114,32 +116,78 @@ def parse_feed(content):
     return results
 
 
-items = []
+# Fetch every feed once; the date window is applied afterwards so a thin
+# day can widen it without re-downloading anything.
+raw = []  # (source, lang, title, url, pub)
+junk_by_source = {}
 for name, url, lang in SOURCES:
     try:
         r = requests.get(url, headers=HEADERS, timeout=12)
         r.raise_for_status()
-        count = junk = 0
+        junk = 0
         for title, link, pub in parse_feed(r.content):
-            if pub and pub < cutoff:
-                continue
             if "news.google.com" in url and " - " in title:
                 title = title.rsplit(" - ", 1)[0]  # drop Google News' " - Source" suffix
             if is_junk_title(title, name):
                 junk += 1
                 continue
-            items.append({
-                "title": title,
-                "url": link,
-                "source": name,
-                "lang": lang,
-                "date": pub.isoformat() if pub else "?",
-            })
-            count += 1
-        print(f"  {name}: {count} articles" + (f" (dropped {junk} junk titles)" if junk else ""))
+            raw.append((name, lang, title, link, pub))
+        junk_by_source[name] = junk
         time.sleep(1)
     except Exception as ex:
         print(f"WARN {name}: {ex}", file=sys.stderr)
+
+
+def normalize_url(u):
+    return u.split("?", 1)[0].split("#", 1)[0].rstrip("/")
+
+
+# URLs already sent in the last 3 archived digests (committed, so present in
+# the Actions checkout). A widened window would otherwise resend them.
+ARCHIVE_DIR = SCRIPT_DIR.parent / "03_send" / "output"
+recent_archives = sorted(ARCHIVE_DIR.glob("*.md"))[-3:]
+already_sent = {
+    normalize_url(u)
+    for f in recent_archives
+    for u in re.findall(r"https?://\S+", f.read_text(encoding="utf-8"))
+}
+
+
+def select(hours):
+    cutoff = now - timedelta(hours=hours)
+    kept, dup = [], 0
+    for name, lang, title, link, pub in raw:
+        if pub and pub < cutoff:
+            continue
+        if normalize_url(link) in already_sent:
+            dup += 1
+            continue
+        kept.append({
+            "title": title,
+            "url": link,
+            "source": name,
+            "lang": lang,
+            "date": pub.isoformat() if pub else "?",
+        })
+    return kept, dup
+
+
+now = datetime.now(timezone.utc)
+window = DEFAULT_WINDOW_H
+items, dup = select(window)
+if len(items) < MIN_ARTICLES:
+    print(f"Only {len(items)} articles in {window}h (< {MIN_ARTICLES}) -- widening window")
+    window = WIDE_WINDOW_H
+    items, dup = select(window)
+
+for name, _, _ in SOURCES:
+    if name not in junk_by_source:
+        continue  # fetch failed, already warned
+    count = sum(1 for a in items if a["source"] == name)
+    junk = junk_by_source[name]
+    print(f"  {name}: {count} articles" + (f" (dropped {junk} junk titles)" if junk else ""))
+print(f"Window used: {window}h | dropped {dup} already sent in "
+      f"{', '.join(f.stem for f in recent_archives) or 'no archives'}")
 
 output_file = OUTPUT_DIR / "articles.json"
 with open(output_file, "w", encoding="utf-8") as f:
